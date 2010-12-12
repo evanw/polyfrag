@@ -300,6 +300,59 @@ Polyhedron *Polyhedron::box(const Vector3D &min, const Vector3D &max)
     return cube;
 }
 
+void recursiveGeodesicSphere(Polyhedron *polyhedron, const Vector3D &a, const Vector3D &b, const Vector3D &c, const Vector3D &center, float radius, int depth)
+{
+    if (depth)
+    {
+        // Generate the midpoints
+        Vector3D ab = (a + b) / 2;
+        Vector3D bc = (b + c) / 2;
+        Vector3D ca = (c + a) / 2;
+
+        // Place the midpoints on the surface of the sphere
+        ab = center + (ab - center).unit() * radius;
+        bc = center + (bc - center).unit() * radius;
+        ca = center + (ca - center).unit() * radius;
+
+        // Recursively generate triangles
+        recursiveGeodesicSphere(polyhedron, a, ab, ca, center, radius, depth - 1);
+        recursiveGeodesicSphere(polyhedron, ab, b, bc, center, radius, depth - 1);
+        recursiveGeodesicSphere(polyhedron, ca, bc, c, center, radius, depth - 1);
+        recursiveGeodesicSphere(polyhedron, ab, bc, ca, center, radius, depth - 1);
+    }
+    else
+    {
+        // Generate one triangle in the base case
+        Polygon polygon;
+        polygon.m_indices.push_back(addVertex(a, polyhedron->m_vertices));
+        polygon.m_indices.push_back(addVertex(b, polyhedron->m_vertices));
+        polygon.m_indices.push_back(addVertex(c, polyhedron->m_vertices));
+        polyhedron->m_polygons.push_back(polygon);
+    }
+}
+
+Polyhedron *Polyhedron::sphere(const Vector3D &center, float radius, int depth)
+{
+    const Vector3D &xneg = Vector3D(-1, 0, 0);
+    const Vector3D &xpos = Vector3D(+1, 0, 0);
+    const Vector3D &yneg = Vector3D(0, -1, 0);
+    const Vector3D &ypos = Vector3D(0, +1, 0);
+    const Vector3D &zneg = Vector3D(0, 0, -1);
+    const Vector3D &zpos = Vector3D(0, 0, +1);
+    Polyhedron *polyhedron = new Polyhedron();
+
+    recursiveGeodesicSphere(polyhedron, xneg, yneg, zpos, center, radius, depth);
+    recursiveGeodesicSphere(polyhedron, xneg, zpos, ypos, center, radius, depth);
+    recursiveGeodesicSphere(polyhedron, xpos, zpos, yneg, center, radius, depth);
+    recursiveGeodesicSphere(polyhedron, xpos, ypos, zpos, center, radius, depth);
+    recursiveGeodesicSphere(polyhedron, xneg, zneg, yneg, center, radius, depth);
+    recursiveGeodesicSphere(polyhedron, xneg, ypos, zneg, center, radius, depth);
+    recursiveGeodesicSphere(polyhedron, xpos, yneg, zneg, center, radius, depth);
+    recursiveGeodesicSphere(polyhedron, xpos, zneg, ypos, center, radius, depth);
+
+    return polyhedron;
+}
+
 void Polyhedron::recursiveSlice(Polyhedron *polyhedron, std::vector<Polyhedron *> &polyhedra, int depth)
 {
     for (int i = 0; i < 10; i++)

@@ -207,6 +207,11 @@ public:
     static Polyhedron *box(const Vector3D &min = Vector3D(-1, -1, -1), const Vector3D &max = Vector3D(+1, +1, +1));
 
     /**
+     * @returns a geodesic sphere with the given center, radius, and recursion depth.
+     */
+    static Polyhedron *sphere(const Vector3D &center = Vector3D(0, 0, 0), float radius = 1, int depth = 2);
+
+    /**
      * Attempts to recursively slice polyhedron into 2^(depth + 1) pieces,
      * returning the results by reference in polyhedra.  Will either delete
      * polyhedron if the split succeeded or add polyhedron to polyhedra if

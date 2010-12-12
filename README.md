@@ -2,7 +2,9 @@ This library contains a stable algorithm for splitting a convex polyhedron
 into two pieces on either side of a 3D plane.  It is useful for generating
 polyhedron fragments to make a polyhedron look like it's breaking apart.
 
-![](https://github.com/evanw/polyfrag/raw/master/polyfrag.png)
+![](https://github.com/evanw/polyfrag/raw/master/polyfrag-box.png)
+
+![](https://github.com/evanw/polyfrag/raw/master/polyfrag-sphere.png)
 
 Example usage:
 
