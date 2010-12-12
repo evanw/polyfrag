@@ -6,20 +6,19 @@ polyhedron fragments to make a polyhedron look like it's breaking apart.
 
 Example usage:
 
-    Polyhedron *poly = Polyhedron::box();
-    Plane plane(Vector3D(1, 2, 3).unit(), 0);
-    std::vector<Polyhedron *> result;
+    srand(1);
+    std::vector<Polyhedron *> polyhedra;
+    Polyhedron::recursiveSlice(Polyhedron::box(Vector3D(-0.5, -2, -0.5), Vector3D(0.5, 2, 0.5)), polyhedra, 4);
 
-    if (poly->slice(plane, result)) {
-        result[0]->draw();
-        result[1]->draw();
-        delete result[0];
-        delete result[1];
-    } else {
-        poly->draw();
+    for (int i = 0; i < polyhedra.size(); i++)
+    {
+        Vector3D offset = polyhedra[i]->getCentroid() * 0.5;
+        glPushMatrix();
+        glTranslatef(offset.x, offset.y, offset.z);
+        polyhedra[i]->draw();
+        glPopMatrix();
+        delete polyhedra[i];
     }
-
-    delete poly;
 
 The generated mesh for a polyhedron uses a shared set of vertices which each
 polygon indexes into.  All polygons are generated in counterclockwise order.

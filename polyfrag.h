@@ -152,20 +152,19 @@ public:
  * Example usage:
  *
  * @code
- * Polyhedron *poly = Polyhedron::box();
- * Plane plane(Vector3D(1, 2, 3).unit(), 0);
- * std::vector<Polyhedron *> result;
+ * srand(1);
+ * std::vector<Polyhedron *> polyhedra;
+ * Polyhedron::recursiveSlice(Polyhedron::box(Vector3D(-0.5, -2, -0.5), Vector3D(0.5, 2, 0.5)), polyhedra, 4);
  *
- * if (poly->slice(plane, result)) {
- *     result[0]->draw();
- *     result[1]->draw();
- *     delete result[0];
- *     delete result[1];
- * } else {
- *     poly->draw();
+ * for (int i = 0; i < polyhedra.size(); i++)
+ * {
+ *     Vector3D offset = polyhedra[i]->getCentroid() * 0.5;
+ *     glPushMatrix();
+ *     glTranslatef(offset.x, offset.y, offset.z);
+ *     polyhedra[i]->draw();
+ *     glPopMatrix();
+ *     delete polyhedra[i];
  * }
- *
- * delete poly;
  * @endcode
  */
 
@@ -206,6 +205,14 @@ public:
      * coordinates that extend from min to max.
      */
     static Polyhedron *box(const Vector3D &min = Vector3D(-1, -1, -1), const Vector3D &max = Vector3D(+1, +1, +1));
+
+    /**
+     * Attempts to recursively slice polyhedron into 2^(depth + 1) pieces,
+     * returning the results by reference in polyhedra.  Will either delete
+     * polyhedron if the split succeeded or add polyhedron to polyhedra if
+     * it failed.
+     */
+    static void recursiveSlice(Polyhedron *polyhedron, std::vector<Polyhedron *> &polyhedra, int depth);
 };
 
 #endif

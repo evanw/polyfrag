@@ -9,10 +9,12 @@
 #endif
 
 #include <float.h>
+#include <stdlib.h>
 #include <algorithm>
 
 inline float min(float a, float b) { return a < b ? a : b; }
 inline float max(float a, float b) { return a < b ? a : b; }
+inline float frand() { return (float)rand() / (float)RAND_MAX; }
 
 // Append newVertex to vertices if it isn't already there, and return the index of newVertex in vertices
 static int addVertex(const Vector3D &newVertex, std::vector<Vector3D> &vertices)
@@ -296,4 +298,35 @@ Polyhedron *Polyhedron::box(const Vector3D &min, const Vector3D &max)
     cube->m_polygons.push_back(Polygon(0, 2, 6, 4));
     cube->m_polygons.push_back(Polygon(1, 5, 7, 3));
     return cube;
+}
+
+void Polyhedron::recursiveSlice(Polyhedron *polyhedron, std::vector<Polyhedron *> &polyhedra, int depth)
+{
+    for (int i = 0; i < 10; i++)
+    {
+        // Generate a random plane about the centroid of polyhedron
+        Vector3D normal = Vector3D(frand() * 2 - 1, frand() * 2 - 1, frand() * 2 - 1).unit();
+        Plane plane(normal, polyhedron->getCentroid().dot(normal));
+
+        // Attempt to split polyhedron by the random plane
+        std::vector<Polyhedron *> result;
+        if (polyhedron->slice(plane, result))
+        {
+            if (depth)
+            {
+                recursiveSlice(result[0], polyhedra, depth - 1);
+                recursiveSlice(result[1], polyhedra, depth - 1);
+            }
+            else
+            {
+                polyhedra.push_back(result[0]);
+                polyhedra.push_back(result[1]);
+            }
+            delete polyhedron;
+            return;
+        }
+    }
+
+    // Couldn't slice polyhedron, just append it to the output
+    polyhedra.push_back(polyhedron);
 }
