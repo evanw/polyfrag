@@ -305,14 +305,9 @@ void recursiveGeodesicSphere(Polyhedron *polyhedron, const Vector3D &a, const Ve
     if (depth)
     {
         // Generate the midpoints
-        Vector3D ab = (a + b) / 2;
-        Vector3D bc = (b + c) / 2;
-        Vector3D ca = (c + a) / 2;
-
-        // Place the midpoints on the surface of the sphere
-        ab = center + (ab - center).unit() * radius;
-        bc = center + (bc - center).unit() * radius;
-        ca = center + (ca - center).unit() * radius;
+        Vector3D ab = (a + b).unit();
+        Vector3D bc = (b + c).unit();
+        Vector3D ca = (c + a).unit();
 
         // Recursively generate triangles
         recursiveGeodesicSphere(polyhedron, a, ab, ca, center, radius, depth - 1);
@@ -324,9 +319,9 @@ void recursiveGeodesicSphere(Polyhedron *polyhedron, const Vector3D &a, const Ve
     {
         // Generate one triangle in the base case
         Polygon polygon;
-        polygon.m_indices.push_back(addVertex(a, polyhedron->m_vertices));
-        polygon.m_indices.push_back(addVertex(b, polyhedron->m_vertices));
-        polygon.m_indices.push_back(addVertex(c, polyhedron->m_vertices));
+        polygon.m_indices.push_back(addVertex(center + a * radius, polyhedron->m_vertices));
+        polygon.m_indices.push_back(addVertex(center + b * radius, polyhedron->m_vertices));
+        polygon.m_indices.push_back(addVertex(center + c * radius, polyhedron->m_vertices));
         polyhedron->m_polygons.push_back(polygon);
     }
 }
